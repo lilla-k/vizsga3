@@ -10,21 +10,20 @@ loadingDiv.textContent = "Loading...";
 const cardsContainer = document.createElement("div");
 rootElement.appendChild(cardsContainer);
 cardsContainer.id = "grid-container";
-const filteredName = inputElement.value
-
-// inputElement.addEventListener("change", {
-//     const response = await fetch("https://api.github.com/users");
-//     const data = await response.json();
-// })
+const filteredName = inputElement.value;
+const errorDiv = document.createElement("div");
+rootElement.appendChild(errorDiv);
 
 
 
 async function getData() {
     const response = await fetch("https://api.github.com/users");
-    const data = await response.json();
     loadingDiv.style.display = "none";
-    console.log(data)
-    data.map(obj => {
+    return users = await response.json();
+}
+
+function renderUsers(users){
+    users.map(obj => {
         const userCard = document.createElement("div");
         cardsContainer.appendChild(userCard);
         userCard.setAttribute("class", "card");
@@ -58,22 +57,33 @@ async function getData() {
             }
             else if (buttonElement.textContent === "Show less") {
                 buttonElement.textContent = "Show more";
-                rankElement.remove();
-                adminElement.remove();
                 rankElement.style.display = "none";
                 adminElement.style.display = "none";
             }
         })
-
-
-
-
     })
-
 }
 
-function init() {
-    getData()
+async function init() {
+    const users = await getData()
+    renderUsers(users);
 }
 
 init();
+
+async function onSearch(event){
+    const users = await getData();
+    const filteredUsers = users.filter(obj => obj.login.startsWith(event.target.value));
+    if (filteredUsers.length===0){
+        errorDiv.textContent = "Nothing found";
+    }
+    resetUsers();
+    renderUsers(filteredUsers);
+}
+
+inputElement.addEventListener("keyup", onSearch);
+
+function resetUsers(){
+    console.log(cardsContainer);
+    cardsContainer.innerHTML="";
+}
